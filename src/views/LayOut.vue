@@ -45,7 +45,7 @@
       <v-toolbar-title>霍格沃兹测试平台</v-toolbar-title>
     </v-app-bar>
 
-    <v-main class="pa-5">
+    <v-main>
       <!--  -->
       <router-view/>
     </v-main>
