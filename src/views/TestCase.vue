@@ -1,9 +1,12 @@
 <template>
   <v-data-table
+    v-model="selected"
     :headers="headers"
     :items="desserts"
     sort-by="calories"
     class="elevation-1"
+    item-key="id"
+    show-select
   >
     <template v-slot:top>
       <v-toolbar
@@ -16,6 +19,60 @@
           vertical
         ></v-divider>
         <v-spacer></v-spacer>
+        <v-dialog
+          v-model="dialogPlan"
+          max-width="500px"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              color="green"
+              dark
+              class="mb-2"
+              v-bind="attrs"
+              v-on="on"
+            >
+              生成计划
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+               测试计划
+            </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    md="4"
+                  >
+                    <v-text-field
+                      v-model="plan"
+                      label="测试计划名称"
+                    ></v-text-field>
+                  </v-col>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="closePlan"
+              >
+                取消
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="savePlan"
+              >
+                保存
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
         <v-dialog
           v-model="dialog"
           max-width="500px"
@@ -55,8 +112,8 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.nodeid"
-                      label="NodeId"
+                      v-model="editedItem.case_title"
+                      label="用例标题"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -133,8 +190,11 @@
 <script>
   export default {
     data: () => ({
+      plan: '',
+      selected: [], 
       dialog: false,
       dialogDelete: false,
+      dialogPlan: false,
       headers: [
         {
           text: 'ID',
@@ -142,7 +202,7 @@
           sortable: false,
           value: 'id',
         },
-        { text: 'NodeID', value: 'nodeid' },
+        { text: '用例标题', value: 'case_title' },
         { text: '备注', value: 'remark' },
         { text: '操作', value: 'actions', sortable: false },
       ],
@@ -150,12 +210,12 @@
       editedIndex: -1,
       editedItem: {
         id: 0,
-        nodeid: '',
+        case_title: '',
         remark: '',
       },
       defaultItem: {
         id: 0,
-        nodeid: '',
+        case_title: '',
         remark: '',
       },
     }),
@@ -276,6 +336,25 @@
         }
         this.close()
       },
+      closePlan(){
+        this.dialogPlan = false
+      },
+      savePlan(){
+        // 调用测试计划生成的接口
+        // this.$api.plan
+        let caseList = []
+        for(let i of this.selected){
+            caseList.push(i.id)
+        }
+        console.log("获取到的测试用例的列表为",caseList)
+        console.log("获取到的计划名称为",this.plan)
+        this.$api.plan.addPlan({"name": this.plan, "testcases":caseList}).then((result) => {
+          console.log(result)
+        }).catch((err) => {
+            console.log(err)
+        });
+        this.dialogPlan = false
+      }
     },
   }
 </script>
